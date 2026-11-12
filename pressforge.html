@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PressForge: AI-ready press releases</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f6f5f1;--card:#fff;--tx:#1c1b18;--mut:#6a675f;--bd:#dcd9d0;--ac:#0f5c4d;--acx:#fff;--warn:#9a5b00;--bad:#a3281c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161614;--card:#211f1c;--tx:#efece4;--mut:#a09c91;--bd:#3a3731;--ac:#4cc3a8;--acx:#0c1a16;--warn:#e2a54a;--bad:#ff8a7a}}
+:root[data-theme="dark"]{--bg:#161614;--card:#211f1c;--tx:#efece4;--mut:#a09c91;--bd:#3a3731;--ac:#4cc3a8;--acx:#0c1a16;--warn:#e2a54a;--bad:#ff8a7a}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.55 system-ui,-apple-system,Segoe UI,sans-serif}
+.w{max-width:920px;margin:0 auto;padding:16px}
+h1{font:600 22px Georgia,serif;margin:0}h2{font:600 17px Georgia,serif;margin:0 0 8px}
+.tabs{display:flex;gap:6px;margin:14px 0;overflow-x:auto}
+.tabs button,.b{border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer;white-space:nowrap}
+.tabs button.on,.b.p{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:16px;margin-bottom:14px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--mut);margin-bottom:3px}
+input,select,textarea{width:100%;padding:9px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:80px}.full{grid-column:1/-1}
+.dd{border:1px solid var(--bd);border-radius:8px;padding:8px;margin-top:8px;display:none}.dd.open{display:block}
+.dd label{display:flex;gap:8px;align-items:flex-start;color:var(--tx);font-size:14px;margin:4px 0}.dd input{width:auto;margin-top:4px}
+.mut{color:var(--mut);font-size:13px}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.chk{display:flex;gap:8px;align-items:center;width:auto}.chk input{width:auto}
+.art h3{font:600 24px/1.25 Georgia,serif;margin:0 0 6px}.art .sub{font-style:italic;color:var(--mut);margin:0 0 14px}
+.art a{color:var(--ac)}.row{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:640px}td,th{border-bottom:1px solid var(--bd);padding:8px;text-align:left;vertical-align:top;font-size:14px}
+pre{background:var(--bg);border:1px solid var(--bd);padding:10px;border-radius:8px;overflow-x:auto;font-size:12px;white-space:pre-wrap}
+.tag{font-size:11px;padding:2px 7px;border-radius:99px;border:1px solid var(--bd);white-space:nowrap}
+.hide{display:none}
+</style></head><body><div class="w">
+<h1>PressForge</h1><div class="mut">Prototype: structured press releases and articles built for search and AI.</div>
+<div class="tabs" id="tabs"><button class="on" data-t="create">1. Create</button><button data-t="synd">2. Syndicate</button><button data-t="spec">3. Prompt and schema</button><button data-t="plan">4. Roadmap</button></div>
+
+<div id="create">
+<div class="card"><h2>Inputs</h2><div class="g">
+<div><label>Company name</label><input id="company"></div>
+<div><label>Website</label><input id="site" placeholder="https://"></div>
+<div><label>Location</label><input id="loc"></div>
+<div><label>Country</label><select id="country"><option>United States</option><option>United Kingdom</option><option>Canada</option><option>Australia</option><option>Ireland</option><option>Other</option></select></div>
+<div><label>Main service/product</label><input id="svc"></div>
+<div><label>Topic/angle</label><input id="topic"></div>
+<div class="full"><label>Keywords (up to 4, comma separated)</label><input id="kw" placeholder="keyword one, keyword two"></div>
+<div><label>Internal URL 1</label><input id="u1" placeholder="https://"></div>
+<div><label>Internal URL 2</label><input id="u2" placeholder="https://"></div>
+<div class="full"><label>Additional information (quotes, business facts, stats you can verify)</label><textarea id="extra"></textarea></div>
+<div><label>Contact name</label><input id="cname"></div>
+<div><label>Email</label><input id="email" type="email"></div>
+<div><label>Format</label><select id="fmt"><option value="press release">Press release</option><option value="article">Article</option></select></div>
+<div><label>Fallback angle (no news)</label><select id="fb"><option value="edu">Company educates consumers</option><option value="trend">Service relevance to a current trend</option></select></div>
+<div class="full"><label class="chk"><input type="checkbox" id="news"> This is newsworthy</label>
+<div class="dd" id="dd"></div></div>
+</div>
+<div class="row"><button class="b p" id="go">Generate (about 750 words)</button><span class="mut" id="st"></span></div></div>
+<div id="out"></div></div>
+
+<div id="synd" class="hide"></div>
+<div id="spec" class="hide"></div>
+<div id="plan" class="hide"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const NW={
+Impact:'Lead with the scale of the effect on people’s lives, finances, health or community. Quantify only with facts the user supplied.',
+'Proximity (Localization)':'Lead with the local connection: the named town, region or community and why it matters to residents there.',
+Timeliness:'Tie the story to what is happening now: a current trend, season, anniversary or recent development. Use only real, widely known context.',
+Prominence:'Foreground involvement of notable people, officials or well-known brands, but only those named in the inputs.',
+'Conflict or Controversy':'Frame the competing viewpoints or debate in balanced, neutral terms. Do not take sides or invent opposing parties.',
+'Human Interest':'Open with a relatable human story drawn only from the supplied information. Keep tone empathetic but factual.',
+'Novelty or Oddity':'Lead with what is unusual or unexpected about the subject, without exaggeration.',
+'Industry Relevance':'Write for trade readers: use sector terminology and explain why the development matters inside the industry.'};
+const STYLE={'United States':'AP style, US spelling, MM/DD/YYYY','United Kingdom':'UK spelling, DD Month YYYY','Canada':'Canadian spelling','Australia':'Australian spelling, DD Month YYYY','Ireland':'UK/Irish spelling','Other':'neutral international English'};
+$('dd').innerHTML=Object.keys(NW).map(k=>`<label><input type="checkbox" value="${esc(k)}"><span>${esc(k)}</span></label>`).join('');
+$('news').onchange=e=>$('dd').classList.toggle('open',e.target.checked);
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));['create','synd','spec','plan'].forEach(t=>$(t).classList.toggle('hide',t!==b.dataset.t))});
+
+const SCHEMA={headline:'string, max 70 chars',subhead:'string',lead:'string, who/what/when/where/why',body:['string paragraphs'],boilerplate:'string',contact:'leave empty string; the app formats contact from the form',links:[{url:'string',anchor:'exact keyword text that appears in body'}],metaTitle:'string, max 60 chars',metaDescription:'string, max 155 chars',faq:[{q:'string',a:'string'}],factsToVerify:['every statistic or general-knowledge claim used']};
+function inputs(){const g=id=>$(id).value.trim();
+const kws=g('kw').split(',').map(s=>s.trim()).filter(Boolean).slice(0,4);
+const urls=[g('u1'),g('u2')].filter(Boolean);
+const picks=[...$('dd').querySelectorAll('input:checked')].map(i=>i.value);
+return {company:g('company'),site:g('site'),loc:g('loc'),country:$('country').value,svc:g('svc'),topic:g('topic'),kws,urls,extra:g('extra'),cname:g('cname'),email:g('email'),fmt:$('fmt').value,news:$('news').checked,picks,fb:$('fb').value}}
+function prompt(i,fix){
+const angle=i.news&&i.picks.length?'NEWSWORTHY. Apply these angle rules:\n'+i.picks.map(p=>`- ${p}: ${NW[p]}`).join('\n'):
+(i.fb==='edu'?`Not newsworthy. Angle: ${i.company} educates consumers about ${i.svc}.`:`Not newsworthy. Angle: relevance of ${i.svc} to a current, real, widely recognized trend. Do not invent a trend or statistics.`);
+return `Write a ${i.fmt} of 750 words (headline through boilerplate, inclusive) for search-engine and AI-answer inclusion.
+RULES:
+1. Use only the facts in INPUTS. Do NOT invent quotes, people, awards, statistics, dates or customers.
+2. Quotation marks may ONLY wrap text copied verbatim from ADDITIONAL INFO. If none, use no quotes.
+3. Factual, neutral tone. Passive voice is fine for neutral phrasing, but never imply endorsements, rankings, consensus or "leader" status that is not in the inputs.
+4. General industry data or well-known facts may be cited only if you are certain they are accurate; name the source in the text and list each in factsToVerify. Otherwise omit.
+5. Use every keyword at least once, naturally. Anchor each internal URL on one keyword (return it in "links"; anchor must appear verbatim in body).
+6. Structure: headline, subhead, lead (who/what/when/where/why), body paragraphs with clear topic sentences, boilerplate, contact. ${i.country} conventions: ${STYLE[i.country]}.
+7. Provide metaTitle, metaDescription and 3 short question-and-answer FAQ items answerable from the inputs.
+ANGLE: ${angle}
+INPUTS: ${JSON.stringify({company:i.company,website:i.site,location:i.loc,service:i.svc,topic:i.topic,keywords:i.kws,internalUrls:i.urls,additionalInfo:i.extra,contact:{name:i.cname,email:i.email}})}
+Return ONLY JSON, no fences, matching this shape: ${JSON.stringify(SCHEMA)}${fix?'\nFIX THESE PROBLEMS FROM THE LAST ATTEMPT: '+fix:''}`}
+const wc=s=>(s.trim().match(/\S+/g)||[]).length;
+const contactLines=i=>[i.cname,i.company,[i.loc,i.country].filter(Boolean).join(', '),i.email,i.site].filter(Boolean);
+const core=d=>[d.headline,d.subhead,d.lead,...(d.body||[]),d.boilerplate].join(' ');
+function validate(d,i){const p=[];const n=wc(core(d));
+if(n<740||n>760)p.push(`Word count was ${n}; it must be 740 to 760 (target 750).`);
+const t=core(d);const q=[...t.matchAll(/[“"]([^”"]{12,})[”"]/g)].map(m=>m[1]);
+const bad=q.filter(x=>!i.extra.includes(x.trim().replace(/[.,]$/,'')));
+if(bad.length)p.push('Remove or fix quotations not verbatim in ADDITIONAL INFO: '+bad.join(' | '));
+const low=t.toLowerCase();const miss=i.kws.filter(k=>!low.includes(k.toLowerCase()));
+if(miss.length)p.push('Missing keywords: '+miss.join(', '));
+return {p,n}}
+function linked(d,i){let body=(d.body||[]).map(esc);const used=[];
+(d.links||[]).filter(l=>i.urls.includes(l.url)).forEach(l=>{const a=esc(l.anchor);for(let k=0;k<body.length;k++){if(body[k].includes(a)){body[k]=body[k].replace(a,`<a href="${esc(l.url)}">${a}</a>`);used.push(l.url);break}}});
+return {html:body.map(p=>`<p>${p}</p>`).join(''),used}}
+let cur=null;
+$('go').onclick=async()=>{const i=inputs();const st=$('st');
+if(!i.company||!i.svc||!i.topic){st.textContent='Add at least company, service and topic.';return}
+if(i.news&&!i.picks.length){st.textContent='Choose at least one newsworthiness type.';return}
+const sample=await (window.claude?claude.use('sample'):null);
+if(!sample){st.textContent='AI generation is unavailable in this view.';return}
+$('go').disabled=true;let fix='',d=null,v=null;
+try{for(let a=1;a<=3;a++){st.textContent=`Generating, attempt ${a} of 3…`;
+d=await sample.json(prompt(i,fix),{cache:false,modelTier:'complex'});v=validate(d,i);
+if(!v.p.length)break;fix=v.p.join(' ')}
+cur={d,i,v};render();st.textContent=v.p.length?'Finished with open issues (see checks).':'Passed all checks.'}
+catch(e){st.textContent='Generation failed: '+(e.message||e.code||'unknown error')}
+$('go').disabled=false};
+function render(){const {d,i,v}=cur;const L=linked(d,i);
+const schema={'@context':'https://schema.org','@type':i.fmt==='article'?'Article':'NewsArticle',headline:d.headline,description:d.metaDescription,author:{'@type':'Organization',name:i.company,url:i.site},publisher:{'@type':'Organization',name:i.company},datePublished:new Date().toISOString().slice(0,10)};
+const faq={'@context':'https://schema.org','@type':'FAQPage',mainEntity:(d.faq||[]).map(f=>({'@type':'Question',name:f.q,acceptedAnswer:{'@type':'Answer',text:f.a}}))};
+$('out').innerHTML=`<div class="card art"><h3>${esc(d.headline)}</h3><p class="sub">${esc(d.subhead)}</p><p><b>${esc(i.loc)}</b> — ${esc(d.lead)}</p>${L.html}<p class="mut"><b>About ${esc(i.company)}</b><br>${esc(d.boilerplate)}</p><p class="mut"><b>Contact</b><br>${contactLines(i).map(esc).join('<br>')}</p></div>
+<div class="card"><h2>Checks</h2><div>Word count: <b>${v.n}</b> ${v.n>=740&&v.n<=760?'✓':'<span class="warn">outside 740–760</span>'}</div>
+${v.p.length?`<div class="bad">${v.p.map(esc).join('<br>')}</div>`:'<div>Quotes match supplied text ✓ · All keywords used ✓</div>'}
+<div>Internal links placed: ${L.used.length} of ${i.urls.length}</div>
+<h2 style="margin-top:12px">Verify before publishing</h2>${(d.factsToVerify||[]).length?(d.factsToVerify||[]).map(f=>`<label class="chk"><input type="checkbox"> ${esc(f)}</label>`).join(''):'<div class="mut">No outside facts were cited.</div>'}</div>
+<div class="card"><h2>SEO and AI structure</h2><div class="mut">Meta title: ${esc(d.metaTitle)}<br>Meta description: ${esc(d.metaDescription)}</div>
+<h2 style="margin-top:10px">FAQ</h2>${(d.faq||[]).map(f=>`<p><b>${esc(f.q)}</b><br>${esc(f.a)}</p>`).join('')}<pre>${esc(JSON.stringify([schema,faq],null,2))}</pre></div>
+<div class="row"><button class="b" id="cp">Copy text</button><button class="b" id="dl-md">Download .md</button><button class="b" id="dl-html">Download .html</button><button class="b" id="rg">Regenerate</button></div>`;
+const md=`# ${d.headline}\n\n*${d.subhead}*\n\n**${i.loc}** — ${d.lead}\n\n${(d.body||[]).join('\n\n')}\n\n**About ${i.company}**\n${d.boilerplate}\n\n**Contact**  \n${contactLines(i).join('  \n')}\n`;
+cur.md=md;cur.html=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>${esc(d.metaTitle)}</title><meta name="description" content="${esc(d.metaDescription)}"><script type="application/ld+json">${JSON.stringify(schema)}<\/script><script type="application/ld+json">${JSON.stringify(faq)}<\/script></head><body><article><h1>${esc(d.headline)}</h1><h2>${esc(d.subhead)}</h2><p><b>${esc(i.loc)}</b> — ${esc(d.lead)}</p>${L.html}<h3>About ${esc(i.company)}</h3><p>${esc(d.boilerplate)}</p><h3>Contact</h3><p>${contactLines(i).map(esc).join('<br>')}</p></article></body></html>`;
+$('cp').onclick=()=>copy(md,$('cp'));$('rg').onclick=()=>$('go').click();
+$('dl-md').onclick=()=>save('press-release.md',md);$('dl-html').onclick=()=>save('press-release.html',cur.html);renderSynd()}
+async function copy(t,b){try{await navigator.clipboard.writeText(t);b.textContent='Copied ✓'}catch(e){b.textContent='Copy blocked: select text manually'}}
+async function save(n,data){try{const dl=await claude.use('downloads');if(!dl){alert('Downloads unavailable here.');return}await dl.save({filename:n,data})}catch(e){}}
+
+const DEST=[
+['Your own site or blog first','Publish first','Free','Own it','Publish here first, then syndicate with a canonical link or a lightly modified version.',''],
+['WordPress (REST API), Ghost, Blogger, Tumblr, Hashnode','Direct publish (OAuth)','Free','API','Real publishing APIs. Best candidates for “connect account and post”.',''],
+['LinkedIn, Facebook Page, Google Business Profile','Direct publish (limited)','Free','API, restricted','Short posts work via API; long-form LinkedIn Articles are not fully supported. Needs app review.',''],
+['Reddit (relevant subreddits)','Assisted','Free','Manual','Follow each subreddit’s self-promotion rules; API access now requires approval.','https://www.reddit.com'],
+['PRLog','Assisted','Free (paid upgrades)','No public API','Reported as the leading free site; links are usually nofollow.','https://www.prlog.org'],
+['OpenPR','Assisted','Free, reported limit about 1 per 30 days','No public API','Editorial review; Europe-based, global audience.','https://www.openpr.com'],
+['PR.com','Assisted','Free basic account','No public API','Free basic posting; wider reach is paid.','https://www.pr.com'],
+['IssueWire','Assisted','Free and paid tiers','No public API','Free tier available; paid for wider distribution.','https://www.issuewire.com'],
+['24-7 Press Release','Assisted','Free and paid tiers','No public API','Low-cost tiers; verify the current free option.','https://www.24-7pressrelease.com'],
+['EIN Presswire','Assisted','One free release reported','No public API','Free tier limited; broad distribution is paid.','https://www.einpresswire.com'],
+['PressReleasePoint','Assisted','Reported 1 free per 3 months','No public API','Verify the current terms before relying on it.','https://www.pressreleasepoint.com'],
+['Qwoted, Featured.com, Connectively (HARO), Source of Sources','Pitch, not post','Free tiers','Manual','Journalist-query platforms. These earn real editorial links; they are not release hosts.',''],
+['Local outlets, Patch, chamber of commerce, industry associations','Email pitch','Free','Manual','Often the best source of followed links. Use the Proximity or Industry angle.','']];
+function renderSynd(){const t=cur?`<div class="row"><button class="b p" id="cp2">Copy release for pasting</button><span class="mut">Paste into each site’s form.</span></div>`:'<p class="warn">Generate a release first on the Create tab.</p>';
+$('synd').innerHTML=`<div class="card"><h2>Where to send it</h2><p class="mut">Free-tier limits come from third-party roundups and change often; verify each site’s current terms. Most free sites cannot be posted to automatically, so the app prepares copy-ready text and tracks your checklist. Automating form submissions with bots usually breaks site terms. OAuth “connect account” needs a backend and is planned for Phase 3.</p>${t}
+<div class="scroll"><table><tr><th>✓</th><th>Destination</th><th>Method</th><th>Cost</th><th>Notes</th></tr>${DEST.map((r,n)=>`<tr><td><input type="checkbox" style="width:auto"></td><td><b>${esc(r[0])}</b>${r[5]?`<br><a href="${esc(r[5])}" target="_blank" rel="noopener">open site</a>`:''}</td><td><span class="tag">${esc(r[1])}</span><br><span class="mut">${esc(r[3])}</span></td><td>${esc(r[2])}</td><td>${esc(r[4])}</td></tr>`).join('')}</table></div>
+<p class="mut">SEO note: syndicated links are often nofollow, and duplicate copies can compete with your own page. Publish on your site first, then link back.</p></div>`;
+if(cur)$('cp2').onclick=()=>copy(cur.md,$('cp2'))}
+renderSynd();
+$('spec').innerHTML=`<div class="card"><h2>Generation prompt (built from the form)</h2><pre>${esc(prompt({company:'{company}',site:'{site}',loc:'{loc}',country:'United States',svc:'{service}',topic:'{topic}',kws:['{kw1}','{kw2}'],urls:['{url1}'],extra:'{additional info}',cname:'{name}',email:'{email}',fmt:'press release',news:true,picks:['Timeliness']}))}</pre>
+<h2>Newsworthiness rule library</h2><pre>${esc(JSON.stringify(NW,null,2))}</pre>
+<h2>Output JSON schema</h2><pre>${esc(JSON.stringify(SCHEMA,null,2))}</pre>
+<h2>Enforced in code, not just the prompt</h2><ul><li>Word count 740–760, up to 3 automatic retries with the measured count fed back.</li><li>Any quotation must appear verbatim in Additional Information.</li><li>Every keyword present; each URL anchored on a keyword.</li><li>Every outside fact listed in a verify checklist.</li></ul></div>`;
+$('plan').innerHTML=`<div class="card"><h2>Build order</h2><p><b>MVP:</b> form, newsworthiness selector, generation with validation, editor, export.<br><b>Phase 2:</b> SEO and schema output, accounts and saved company profiles, assisted-submission checklist, version history, per-section regenerate, readability and keyword-density scores, plagiarism check.<br><b>Phase 3:</b> OAuth publishing (WordPress, Ghost, Blogger, Tumblr, Hashnode, Facebook, Google Business Profile, LinkedIn posts), UTM tagging and click tracking, scheduling and follow-up reminders, multi-language output, media kit and image alt text, subscription tiers.</p><p class="mut">Stack: Next.js for web and Expo (React Native) for mobile, one shared backend that holds API keys and OAuth tokens.</p></div>`;
+</script></body></html>
